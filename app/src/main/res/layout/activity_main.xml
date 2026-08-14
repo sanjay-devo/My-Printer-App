@@ -54,7 +54,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
-    <!-- Save as PDF Action Bar (72dp height for cleaner hierarchy) -->
+    <!-- Save as PDF Action Bar (72dp height) -->
     <LinearLayout
         android:id="@+id/btnSaveAsPdf"
         android:layout_width="match_parent"
@@ -62,6 +62,7 @@
         android:background="@color/primary_red"
         android:clickable="true"
         android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="24dp"
@@ -85,11 +86,84 @@
 
     </LinearLayout>
 
-    <!-- Content Area -->
+    <!-- Additional Action Buttons Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Photos and Images Button -->
+        <LinearLayout
+            android:id="@+id/btnPhotos"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:background="@color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_photo"
+                android:contentDescription="@string/photo_icon_desc"
+                app:tint="@color/primary_red" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:text="@string/photos_and_images"
+                android:textColor="@color/primary_red"
+                android:textSize="19sp"
+                android:fontFamily="sans-serif-medium" />
+
+        </LinearLayout>
+
+        <!-- Documents Button -->
+        <LinearLayout
+            android:id="@+id/btnDocuments"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginTop="12dp"
+            android:background="@color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_document"
+                android:contentDescription="@string/document_icon_desc"
+                app:tint="@color/primary_red" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:text="@string/documents"
+                android:textColor="@color/primary_red"
+                android:textSize="19sp"
+                android:fontFamily="sans-serif-medium" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Empty Content Area -->
     <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@color/app_background" />
+        android:layout_weight="1" />
 
 </LinearLayout>
