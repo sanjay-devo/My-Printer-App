@@ -8,4 +8,6 @@
     <color name="light_cream">#EED9B9</color>
     <color name="app_background">#FCF0E0</color>
     <color name="primary_text">#241416</color>
+    <color name="secondary_text">#6F6263</color>
+    <color name="surface">#FFFFFF</color>
 </resources>

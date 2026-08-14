@@ -1,17 +1,30 @@
 package com.myprinter.app
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import com.myprinter.app.utils.PrintUtils
 
 class MainActivity : AppCompatActivity() {
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { handleSelectedUri(it) }
+    }
+
+    private val pickPdfLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { handleSelectedUri(it) }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -50,11 +63,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnPhotos.setOnClickListener {
-            Toast.makeText(this, R.string.photos_and_images, Toast.LENGTH_SHORT).show()
+            pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
         btnDocuments.setOnClickListener {
-            Toast.makeText(this, R.string.documents, Toast.LENGTH_SHORT).show()
+            pickPdfLauncher.launch(arrayOf("application/pdf"))
+        }
+    }
+
+    private fun handleSelectedUri(uri: android.net.Uri) {
+        val printItem = PrintUtils.getPrintItemFromUri(this, uri)
+        if (printItem != null) {
+            val intent = Intent(this, PreviewActivity::class.java).apply {
+                putExtra("INITIAL_ITEM", printItem)
+            }
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Failed to analyze file", Toast.LENGTH_SHORT).show()
         }
     }
 }
