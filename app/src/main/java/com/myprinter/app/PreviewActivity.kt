@@ -1,16 +1,8 @@
 package com.myprinter.app
 
-import android.content.Context
 import android.graphics.Color
-import android.graphics.pdf.PdfDocument
 import android.os.Bundle
-import android.os.CancellationSignal
-import android.os.ParcelFileDescriptor
-import android.print.PageRange
 import android.print.PrintAttributes
-import android.print.PrintDocumentAdapter
-import android.print.PrintDocumentInfo
-import android.print.PrintManager
 import android.print.pdf.PrintedPdfDocument
 import android.view.View
 import android.widget.TextView
@@ -35,6 +27,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class PreviewActivity : AppCompatActivity() {
 
@@ -47,13 +42,6 @@ class PreviewActivity : AppCompatActivity() {
             PrintUtils.getPrintItemFromUri(this, uri)?.let { printItems.add(it) }
         }
         updateUI()
-    }
-
-    private val pickMoreDocs = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let {
-            PrintUtils.getPrintItemFromUri(this, it)?.let { printItems.add(it) }
-            updateUI()
-        }
     }
 
     private val savePdfLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
@@ -98,24 +86,20 @@ class PreviewActivity : AppCompatActivity() {
         findViewById<View>(R.id.ivSettings).setOnClickListener {
             Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
         }
-        findViewById<View>(R.id.btnPrint).setOnClickListener {
-            doPrint()
+        
+        val savePdfAction = View.OnClickListener {
+            val date = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
+            savePdfLauncher.launch("My_Printer_$date.pdf")
         }
-        findViewById<View>(R.id.tvSaveAsPdf).setOnClickListener {
-            savePdfLauncher.launch("MyPrinter_Document.pdf")
-        }
+        
+        findViewById<View>(R.id.btnPrint).setOnClickListener(savePdfAction)
+        findViewById<View>(R.id.tvSaveAsPdf).setOnClickListener(savePdfAction)
     }
 
     private fun updateUI() {
         printAdapter.setItems(printItems)
         val totalPages = printItems.sumOf { it.pageCount }
         findViewById<TextView>(R.id.tvCopiesInfo).text = "Copies: ${printSettings.copies} | All ($totalPages pages)"
-    }
-
-    private fun doPrint() {
-        val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
-        val jobName = "${getString(R.string.app_name)} Document"
-        printManager.print(jobName, MyPrintAdapter(this, printItems), null)
     }
 
     private fun performSavePdf(uri: android.net.Uri) {
@@ -143,7 +127,7 @@ class PreviewActivity : AppCompatActivity() {
                         pdf.writeTo(FileOutputStream(pfd.fileDescriptor))
                     }
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@PreviewActivity, "Saved successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@PreviewActivity, "PDF saved successfully", Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: IOException) {
                     withContext(Dispatchers.Main) {
@@ -152,60 +136,6 @@ class PreviewActivity : AppCompatActivity() {
                 } finally {
                     pdf.close()
                 }
-            }
-        }
-    }
-
-    private class MyPrintAdapter(val context: Context, val items: List<PrintItem>) : PrintDocumentAdapter() {
-        private var pdfDocument: PrintedPdfDocument? = null
-
-        override fun onLayout(
-            oldAttributes: PrintAttributes?,
-            newAttributes: PrintAttributes,
-            cancellationSignal: CancellationSignal?,
-            callback: LayoutResultCallback,
-            extras: Bundle?
-        ) {
-            pdfDocument = PrintedPdfDocument(context, newAttributes)
-            
-            val totalPages = items.sumOf { it.pageCount }
-            if (totalPages > 0) {
-                val info = PrintDocumentInfo.Builder("print_output.pdf")
-                    .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                    .setPageCount(totalPages)
-                    .build()
-                callback.onLayoutFinished(info, true)
-            } else {
-                callback.onLayoutFailed("No pages to print")
-            }
-        }
-
-        override fun onWrite(
-            pages: Array<out PageRange>?,
-            destination: ParcelFileDescriptor,
-            cancellationSignal: CancellationSignal?,
-            callback: WriteResultCallback
-        ) {
-            val pdf = pdfDocument ?: return
-            var currentPageIndex = 0
-            
-            items.forEach { item ->
-                for (i in 0 until item.pageCount) {
-                    val page = pdf.startPage(currentPageIndex)
-                    PrintUtils.drawItemToCanvas(context, page.canvas, item, i, page.canvas.width, page.canvas.height)
-                    pdf.finishPage(page)
-                    currentPageIndex++
-                }
-            }
-
-            try {
-                pdf.writeTo(FileOutputStream(destination.fileDescriptor))
-                callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
-            } catch (e: IOException) {
-                callback.onWriteFailed(e.toString())
-            } finally {
-                pdf.close()
-                pdfDocument = null
             }
         }
     }
