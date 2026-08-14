@@ -17,10 +17,10 @@
         android:background="@color/primary_dark_red"
         android:orientation="vertical">
 
-        <!-- Actual Header Content (64dp height) -->
+        <!-- Actual Header Content (56dp height for modern feel) -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp">
+            android:layout_height="56dp">
 
             <TextView
                 android:id="@+id/tvAppName"
@@ -29,8 +29,8 @@
                 android:layout_marginStart="20dp"
                 android:text="@string/app_name"
                 android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold"
+                android:textSize="21sp"
+                android:fontFamily="sans-serif-medium"
                 android:singleLine="true"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -38,13 +38,13 @@
 
             <ImageView
                 android:id="@+id/ivInfo"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_marginEnd="18dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="6dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="2dp"
+                android:padding="12dp"
                 android:src="@drawable/ic_info_outline"
                 android:contentDescription="@string/info_icon_desc"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -54,11 +54,11 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
-    <!-- Save as PDF Action Bar (88dp height) -->
+    <!-- Save as PDF Action Bar (72dp height for cleaner hierarchy) -->
     <LinearLayout
         android:id="@+id/btnSaveAsPdf"
         android:layout_width="match_parent"
-        android:layout_height="88dp"
+        android:layout_height="72dp"
         android:background="@color/primary_red"
         android:clickable="true"
         android:focusable="true"
@@ -68,8 +68,8 @@
         android:paddingEnd="24dp">
 
         <ImageView
-            android:layout_width="42dp"
-            android:layout_height="42dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@drawable/ic_printer"
             android:contentDescription="@string/printer_icon_desc"
             app:tint="@color/white" />
@@ -80,8 +80,8 @@
             android:layout_marginStart="20dp"
             android:text="@string/save_as_pdf"
             android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textSize="19sp"
+            android:fontFamily="sans-serif-medium" />
 
     </LinearLayout>
 
