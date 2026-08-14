@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.myprinter.app.adapters.PrintAdapter
 import com.myprinter.app.models.PrintItem
@@ -74,9 +75,25 @@ class PreviewActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         val rvPages = findViewById<RecyclerView>(R.id.rvPages)
+        val tvPageNumber = findViewById<TextView>(R.id.tvGlobalPageNumber)
+        
         printAdapter = PrintAdapter(lifecycleScope)
-        rvPages.layoutManager = LinearLayoutManager(this)
+        rvPages.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvPages.adapter = printAdapter
+        
+        val snapHelper = PagerSnapHelper()
+        snapHelper.attachToRecyclerView(rvPages)
+        
+        rvPages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val position = layoutManager.findFirstVisibleItemPosition()
+                if (position != RecyclerView.NO_POSITION) {
+                    val total = printAdapter.itemCount
+                    tvPageNumber.text = "${position + 1} / $total"
+                }
+            }
+        })
     }
 
     private fun setupClickListeners() {
@@ -100,6 +117,7 @@ class PreviewActivity : AppCompatActivity() {
         printAdapter.setItems(printItems)
         val totalPages = printItems.sumOf { it.pageCount }
         findViewById<TextView>(R.id.tvCopiesInfo).text = "Copies: ${printSettings.copies} | All ($totalPages pages)"
+        findViewById<TextView>(R.id.tvGlobalPageNumber).text = "1 / $totalPages"
     }
 
     private fun performSavePdf(uri: android.net.Uri) {

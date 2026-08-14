@@ -168,8 +168,21 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPages"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:clipToPadding="false"
-        android:padding="16dp" />
+        android:paddingHorizontal="40dp"
+        android:paddingVertical="16dp" />
+
+    <TextView
+        android:id="@+id/tvGlobalPageNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/secondary_text"
+        android:textSize="16sp"
+        tools:text="1 / 5" />
 
 </LinearLayout>

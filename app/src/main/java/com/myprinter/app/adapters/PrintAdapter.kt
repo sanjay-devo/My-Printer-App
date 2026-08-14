@@ -35,23 +35,21 @@ class PrintAdapter(private val coroutineScope: CoroutineScope) : RecyclerView.Ad
     }
 
     override fun onBindViewHolder(holder: PageViewHolder, position: Int) {
-        holder.bind(pages[position], position + 1, pages.size)
+        holder.bind(pages[position])
     }
 
     override fun getItemCount(): Int = pages.size
 
     inner class PageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val ivPageContent: ImageView = view.findViewById(R.id.ivPageContent)
-        private val tvPageNumber: TextView = view.findViewById(R.id.tvPageNumber)
 
-        fun bind(printPage: PrintPage, current: Int, total: Int) {
-            tvPageNumber.text = "$current / $total"
+        fun bind(printPage: PrintPage) {
             ivPageContent.setImageBitmap(null)
             
             coroutineScope.launch {
                 val bitmap = withContext(Dispatchers.IO) {
                     if (printPage.item.fileType == FileType.IMAGE) {
-                        PrintUtils.decodeSampledBitmap(itemView.context, printPage.item.uri, 800, 800)
+                        PrintUtils.decodeSampledBitmap(itemView.context, printPage.item.uri, 1000, 1000)
                     } else {
                         PrintUtils.renderPdfPage(itemView.context, printPage.item.uri, printPage.pageIndex)
                     }
