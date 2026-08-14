@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">My Printer</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="save_as_pdf">Save as PDF</string>
+    <string name="info_icon_desc">App Info</string>
+    <string name="printer_icon_desc">Printer Icon</string>
+</resources>

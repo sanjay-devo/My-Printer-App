@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MyPrinter" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <item name="android:statusBarColor">@color/primary_dark_red</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
