@@ -22,7 +22,7 @@ data class PrintItem(
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt(),
-        null // Simplified dimensionsMm for manual parcelable
+        null
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -37,9 +37,12 @@ data class PrintItem(
 
     override fun describeContents(): Int = 0
 
-    companion object CREATOR : Parcelable.Creator<PrintItem> {
-        override fun createFromParcel(parcel: Parcel): PrintItem = PrintItem(parcel)
-        override fun newArray(size: Int): Array<PrintItem?> = arrayOfNulls(size)
+    companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<PrintItem> {
+            override fun createFromParcel(parcel: Parcel): PrintItem = PrintItem(parcel)
+            override fun newArray(size: Int): Array<PrintItem?> = arrayOfNulls(size)
+        }
     }
 }
 
@@ -51,9 +54,12 @@ enum class FileType : Parcelable {
         dest.writeInt(ordinal)
     }
 
-    companion object CREATOR : Parcelable.Creator<FileType> {
-        override fun createFromParcel(parcel: Parcel): FileType = values()[parcel.readInt()]
-        override fun newArray(size: Int): Array<FileType?> = arrayOfNulls(size)
+    companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<FileType> {
+            override fun createFromParcel(parcel: Parcel): FileType = values()[parcel.readInt()]
+            override fun newArray(size: Int): Array<FileType?> = arrayOfNulls(size)
+        }
     }
 }
 
@@ -91,8 +97,75 @@ data class PrintSettings(
 
     override fun describeContents(): Int = 0
 
-    companion object CREATOR : Parcelable.Creator<PrintSettings> {
-        override fun createFromParcel(parcel: Parcel): PrintSettings = PrintSettings(parcel)
-        override fun newArray(size: Int): Array<PrintSettings?> = arrayOfNulls(size)
+    companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<PrintSettings> {
+            override fun createFromParcel(parcel: Parcel): PrintSettings = PrintSettings(parcel)
+            override fun newArray(size: Int): Array<PrintSettings?> = arrayOfNulls(size)
+        }
+    }
+}
+
+sealed class PrinterDestination : Parcelable {
+    object Pdf : PrinterDestination() {
+        override fun describeContents(): Int = 0
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            dest.writeInt(0)
+        }
+    }
+
+    data class Usb(
+        val deviceName: String,
+        val manufacturerName: String?,
+        val productName: String?,
+        val vendorId: Int,
+        val productId: Int
+    ) : PrinterDestination() {
+        override fun describeContents(): Int = 0
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            dest.writeInt(1)
+            dest.writeString(deviceName)
+            dest.writeString(manufacturerName)
+            dest.writeString(productName)
+            dest.writeInt(vendorId)
+            dest.writeInt(productId)
+        }
+    }
+
+    object WifiPlaceholder : PrinterDestination() {
+        override fun describeContents(): Int = 0
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            dest.writeInt(2)
+        }
+    }
+
+    object BluetoothPlaceholder : PrinterDestination() {
+        override fun describeContents(): Int = 0
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            dest.writeInt(3)
+        }
+    }
+
+    companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<PrinterDestination> {
+            override fun createFromParcel(parcel: Parcel): PrinterDestination {
+                return when (val type = parcel.readInt()) {
+                    0 -> Pdf
+                    1 -> Usb(
+                        parcel.readString()!!,
+                        parcel.readString(),
+                        parcel.readString(),
+                        parcel.readInt(),
+                        parcel.readInt()
+                    )
+                    2 -> WifiPlaceholder
+                    3 -> BluetoothPlaceholder
+                    else -> throw IllegalArgumentException("Unknown type $type")
+                }
+            }
+
+            override fun newArray(size: Int): Array<PrinterDestination?> = arrayOfNulls(size)
+        }
     }
 }

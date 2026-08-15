@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import com.myprinter.app.models.PrinterDestination
+import com.myprinter.app.models.PrinterManager
 import com.myprinter.app.utils.PrintUtils
 
 class MainActivity : AppCompatActivity() {
@@ -23,6 +27,16 @@ class MainActivity : AppCompatActivity() {
 
     private val pickPdfLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { handleSelectedUri(it) }
+    }
+
+    private val printerSetupLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val destination = result.data?.getParcelableExtra<PrinterDestination>("SELECTED_PRINTER")
+            if (destination != null) {
+                PrinterManager.selectedPrinter = destination
+                updatePrinterUI()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +73,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnSaveAsPdf.setOnClickListener {
-            Toast.makeText(this, R.string.save_as_pdf, Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, PrinterSetupActivity::class.java).apply {
+                putExtra("CURRENT_DESTINATION", PrinterManager.selectedPrinter)
+            }
+            printerSetupLauncher.launch(intent)
         }
 
         btnPhotos.setOnClickListener {
@@ -68,6 +85,32 @@ class MainActivity : AppCompatActivity() {
 
         btnDocuments.setOnClickListener {
             pickPdfLauncher.launch(arrayOf("application/pdf"))
+        }
+
+        updatePrinterUI()
+    }
+
+    private fun updatePrinterUI() {
+        val tvPrinterName = findViewById<TextView>(R.id.tvSaveAsPdf)
+        val ivPrinterIcon = findViewById<ImageView>(R.id.ivSaveAsPdf)
+        
+        when (val destination = PrinterManager.selectedPrinter) {
+            is PrinterDestination.Pdf -> {
+                tvPrinterName.text = getString(R.string.save_as_pdf)
+                ivPrinterIcon.setImageResource(R.drawable.ic_document)
+            }
+            is PrinterDestination.Usb -> {
+                tvPrinterName.text = destination.productName ?: getString(R.string.usb_printers)
+                ivPrinterIcon.setImageResource(R.drawable.ic_usb)
+            }
+            is PrinterDestination.WifiPlaceholder -> {
+                tvPrinterName.text = getString(R.string.wifi_printers)
+                ivPrinterIcon.setImageResource(R.drawable.ic_wifi)
+            }
+            is PrinterDestination.BluetoothPlaceholder -> {
+                tvPrinterName.text = getString(R.string.bluetooth_printers)
+                ivPrinterIcon.setImageResource(R.drawable.ic_bluetooth)
+            }
         }
     }
 

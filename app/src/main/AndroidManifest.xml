@@ -24,6 +24,30 @@
         <activity
             android:name=".PreviewActivity"
             android:exported="false" />
+        <activity
+            android:name=".PrinterSetupActivity"
+            android:exported="false"
+            android:label="@string/printer_setup" />
+        <activity
+            android:name=".UsbPrintersActivity"
+            android:exported="false"
+            android:label="@string/usb_printers" />
+        <activity
+            android:name=".WifiPrintersActivity"
+            android:exported="false"
+            android:label="@string/wifi_printers" />
+        <activity
+            android:name=".BluetoothPrintersActivity"
+            android:exported="false"
+            android:label="@string/bluetooth_printers" />
+
+        <receiver
+            android:name=".UsbPermissionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.myprinter.app.USB_PERMISSION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

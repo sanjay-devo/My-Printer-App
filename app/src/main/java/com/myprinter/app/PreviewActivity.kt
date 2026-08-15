@@ -1,10 +1,12 @@
 package com.myprinter.app
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.print.PrintAttributes
 import android.print.pdf.PrintedPdfDocument
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.SystemBarStyle
@@ -22,6 +24,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.myprinter.app.adapters.PrintAdapter
 import com.myprinter.app.models.PrintItem
 import com.myprinter.app.models.PrintSettings
+import com.myprinter.app.models.PrinterDestination
+import com.myprinter.app.models.PrinterManager
 import com.myprinter.app.utils.PrintUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +47,16 @@ class PreviewActivity : AppCompatActivity() {
             PrintUtils.getPrintItemFromUri(this, uri)?.let { printItems.add(it) }
         }
         updateUI()
+    }
+
+    private val setupPrinterLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val destination = result.data?.getParcelableExtra<PrinterDestination>("SELECTED_PRINTER")
+            if (destination != null) {
+                PrinterManager.selectedPrinter = destination
+                updatePrinterUI()
+            }
+        }
     }
 
     private val savePdfLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
@@ -71,6 +85,7 @@ class PreviewActivity : AppCompatActivity() {
         setupRecyclerView()
         setupClickListeners()
         updateUI()
+        updatePrinterUI()
     }
 
     private fun setupRecyclerView() {
@@ -104,13 +119,52 @@ class PreviewActivity : AppCompatActivity() {
             Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show()
         }
         
-        val savePdfAction = View.OnClickListener {
-            val date = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
-            savePdfLauncher.launch("My_Printer_$date.pdf")
+        findViewById<View>(R.id.tvSaveAsPdf).setOnClickListener {
+            val intent = Intent(this, PrinterSetupActivity::class.java).apply {
+                putExtra("CURRENT_DESTINATION", PrinterManager.selectedPrinter)
+            }
+            setupPrinterLauncher.launch(intent)
         }
         
-        findViewById<View>(R.id.btnPrint).setOnClickListener(savePdfAction)
-        findViewById<View>(R.id.tvSaveAsPdf).setOnClickListener(savePdfAction)
+        findViewById<View>(R.id.btnPrint).setOnClickListener {
+            when (val destination = PrinterManager.selectedPrinter) {
+                is PrinterDestination.Pdf -> {
+                    val date = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
+                    savePdfLauncher.launch("My_Printer_$date.pdf")
+                }
+                is PrinterDestination.Usb -> {
+                    Toast.makeText(this, "Printing to ${destination.productName ?: "USB Printer"}...", Toast.LENGTH_SHORT).show()
+                    // Real USB printing would be implemented here or in a separate manager
+                }
+                else -> {
+                    Toast.makeText(this, "Selected printer is not available for printing yet.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun updatePrinterUI() {
+        val tvPrinter = findViewById<TextView>(R.id.tvSaveAsPdf)
+        val ivPrinter = findViewById<ImageView>(R.id.ivPrinter)
+        
+        when (val destination = PrinterManager.selectedPrinter) {
+            is PrinterDestination.Pdf -> {
+                tvPrinter.text = getString(R.string.save_as_pdf)
+                ivPrinter.setImageResource(R.drawable.ic_document)
+            }
+            is PrinterDestination.Usb -> {
+                tvPrinter.text = destination.productName ?: getString(R.string.usb_printers)
+                ivPrinter.setImageResource(R.drawable.ic_usb)
+            }
+            is PrinterDestination.WifiPlaceholder -> {
+                tvPrinter.text = getString(R.string.wifi_printers)
+                ivPrinter.setImageResource(R.drawable.ic_wifi)
+            }
+            is PrinterDestination.BluetoothPlaceholder -> {
+                tvPrinter.text = getString(R.string.bluetooth_printers)
+                ivPrinter.setImageResource(R.drawable.ic_bluetooth)
+            }
+        }
     }
 
     private fun updateUI() {

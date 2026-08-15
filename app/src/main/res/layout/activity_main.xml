@@ -54,7 +54,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
-    <!-- Save as PDF Action Bar (72dp height) -->
     <LinearLayout
         android:id="@+id/btnSaveAsPdf"
         android:layout_width="match_parent"
@@ -69,6 +68,7 @@
         android:paddingEnd="24dp">
 
         <ImageView
+            android:id="@+id/ivSaveAsPdf"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/ic_printer"
@@ -76,6 +76,7 @@
             app:tint="@color/white" />
 
         <TextView
+            android:id="@+id/tvSaveAsPdf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
